@@ -4,35 +4,43 @@ import os
 """
 Utilisation d'argparse pour un script Python qui
 manipule des fichiers texte en fonction d'options spécifiées en ligne de commande.
-Ce script permet de lire, écrire ou concaténer des fichiers texte et les vider.
+Ce script permet de lire, écrire, concaténer ou vider des fichiers texte.
 """
 
 def lire_fichier(racine_un):
     """
-    Pre :
+    Préconditions :
     Le fichier spécifié par racine_un doit exister sur le système de fichiers.
 
-    Post :
+    Postconditions :
     Si le fichier existe, la fonction lit et retourne son contenu.
     Si le fichier n'existe pas, la fonction renvoie un message indiquant que le fichier n'a pas été trouvé.
     """
-    try:
-        with open(racine_un, 'r') as file:
-            contenu = file.read()
-            return contenu
-    except FileNotFoundError:
-        return f"Le fichier '{racine_un}' n'existe pas"
-    
+    #print(f"Chemin du fichier à lire : {racine_un}")
+    if os.path.exists(racine_un):
+        #print("Le fichier existe.")
+        try:
+            with open(racine_un, 'r') as file:
+                contenu = file.read()
+                return contenu
+        except IOError as e:
+            #print(f"Erreur d'accès au fichier '{racine_un}': {str(e)}")
+            return f"Erreur d'accès au fichier '{racine_un}': {str(e)}"
+    else:
+        message = f"Le fichier '{racine_un}' n'existe pas"
+        #print(f"Message retourné : '{message}'")
+        return message
+
 def ecrire_fichier(racine_deux, contenu):
     """
-    Pre :
+    Préconditions :
     Le fichier spécifié par racine_deux doit être accessible en écriture sur le système de fichiers.
-    Post :
+    
+    Postconditions :
     Si le fichier existe et peut être ouvert en mode écriture, la fonction écrit le contenu passé en paramètre dans
     le fichier spécifié et renvoie un message de confirmation.
     Si le fichier n'existe pas, la fonction renvoie un message indiquant que le fichier n'a pas été trouvé.
     """
-   
     try:
         with open(racine_deux, 'w') as file:
             file.write(contenu)
@@ -42,14 +50,13 @@ def ecrire_fichier(racine_deux, contenu):
     except OSError as e:
         return f"Erreur d'accès au fichier '{racine_deux}': {e}"
 
-
 def concatener_fichiers(racine_trois, fichier_destination):
     """
-    Pre :
+    Préconditions :
     Chaque chemin de fichier dans la liste racine_trois doit pointer vers un fichier existant.
     Le fichier spécifié par fichier_destination doit être accessible en écriture sur le système de fichiers.
 
-    Post :
+    Postconditions :
     Si tous les fichiers spécifiés dans racine_trois existent et peuvent être ouverts en lecture, leur contenu est
     concaténé dans le fichier spécifié par fichier_destination, avec un saut de ligne ajouté à la fin de chaque
     fichier.
@@ -57,8 +64,7 @@ def concatener_fichiers(racine_trois, fichier_destination):
     Si une erreur d'entrée/sortie survient pendant la lecture ou l'écriture des fichiers, un message d'erreur
     approprié est renvoyé.
     """
-    
-    any_file_missing = False
+    fichier_manquant = False
     try:
         with open(fichier_destination, 'a') as destination:
             for fichier in racine_trois:
@@ -72,33 +78,45 @@ def concatener_fichiers(racine_trois, fichier_destination):
                         print(f"Erreur d'entrée/sortie lors de la lecture du fichier '{fichier}': {e}")
                 else:
                     print(f"Le fichier '{fichier}' n'existe pas.")
-                    any_file_missing = True
-        if any_file_missing:
+                    fichier_manquant = True
+        if fichier_manquant:
             return "Certains fichiers n'ont pas été trouvés, la concaténation est incomplète."
         else:
             return f"Fichiers concaténés dans '{fichier_destination}'"
     except IOError as e:
         return f"Erreur d'entrée/sortie lors de l'ouverture du fichier de destination '{fichier_destination}': {e}"
 
-
-
 def vider_fichier(racine_quatre):
     """
-    Pre :
+    Préconditions :
     racine_quatre doit spécifier un chemin vers un fichier existant ou non existant.
     Le fichier spécifié par racine_quatre doit être accessible en écriture sur le système de fichiers.
 
-    Post :
+    Postconditions :
     Si le fichier spécifié par racine_quatre existe, son contenu est vidé, et un message confirmant cette opération
     est renvoyé.
     Si le fichier spécifié par racine_quatre n'existe pas, un message est renvoyé pour indiquer son absence.
     """
+    racine_quatre = os.path.abspath(racine_quatre)  # Convertir en chemin absolu
+    print(f"Vérification de l'existence du fichier : {racine_quatre}")
+
+    # Vérifier si c'est un fichier et non un répertoire
+    if os.path.isdir(racine_quatre):
+        return f"Erreur : '{racine_quatre}' est un répertoire, pas un fichier."
+
+    if not os.path.exists(racine_quatre):
+        #print(f"Le fichier '{racine_quatre}' n'existe pas.")
+        return f"Le fichier '{racine_quatre}' n'existe pas."
+    
     try:
+        #print(f"Vidage du fichier : {racine_quatre}")
         with open(racine_quatre, 'w') as file:
             file.write('')
         return f"Contenu du fichier '{racine_quatre}' vidé."
-    except IOError:
-        return f"Erreur d'accès au fichier '{racine_quatre}'."
+    except IOError as e:
+        #print(f"Erreur d'accès au fichier '{racine_quatre}': {str(e)}")
+        return f"Erreur d'accès au fichier '{racine_quatre}': {str(e)}"
+
 
 def main():
     parser = argparse.ArgumentParser(description='Manipulation de fichiers')
