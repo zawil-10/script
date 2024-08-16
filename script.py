@@ -117,7 +117,7 @@ def vider_fichier(racine_quatre):
         #print(f"Erreur d'accès au fichier '{racine_quatre}': {str(e)}")
         return f"Erreur d'accès au fichier '{racine_quatre}': {str(e)}"
 
-
+# 123 test 
 def main():
     parser = argparse.ArgumentParser(description='Manipulation de fichiers')
     parser.add_argument('action', choices=['lire', 'ecrire', 'concatener', 'vider'], help='Action à effectuer')
